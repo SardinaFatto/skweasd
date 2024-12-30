@@ -122,29 +122,31 @@ async def scrappy_coco():
     HEADERS = {
         "Authorization": user_sesion_token
     }
-    MESSAGES = []
+    LAST_MESSAGE =None
 
     # we need to add filering in here now (date -> whitelist -> blacklist)
     responce = requests.get(URL, headers=HEADERS)
     if responce.status_code == 200:
         await princonsole("CONNECTION CREATED")
         json_message = json.loads(responce.text)[0]
+        LAST_MESSAGE = json_message
         SESSION_DATA.console.page.controls[0].controls[0].content.controls.append(await prittyfy_my_embed(json_message))
         SESSION_DATA.console.page.update()
     else:
         print(f"FAILED TO RECIVE DATA: {responce.status_code}")
     
     for _ in range(20):
-        responce = requests.get(f"{URL}&before={MESSAGES[-1]['id']}", headers=HEADERS)
+        responce = requests.get(f"{URL}&before={LAST_MESSAGE['id']}", headers=HEADERS)
         if responce.status_code == 200:
             json_message = json.loads(responce.text)[0]
+            LAST_MESSAGE = json_message
             if await validate_message(json_message):
                 SESSION_DATA.console.page.controls[0].controls[0].content.controls.append(await prittyfy_my_embed(json_message))
                 SESSION_DATA.console.page.update()
             await princonsole(f"[GET 200] MESSAGE RESPOND: {json_message['id']} added main to pull")
         else:
             print(f"FAILED TO RECIVE DATA: {responce.status_code}")
-    await princonsole(f"TOTAL MESSAGES FOUND {MESSAGES.__len__()}")
+    await princonsole(f"SKIBIDI DONE")
     #await WrapNPost(MESSAGES)
     
 
