@@ -14,6 +14,8 @@ class WorkDataClass():
         self.channel_id = 0
         self.channel_details = ""
 
+
+SEARCHING_MODE = False
 SESSION_DATA = WorkDataClass()
 
 COLLORS = {
@@ -127,7 +129,8 @@ async def scrappy_coco():
     if responce.status_code == 200:
         await princonsole("CONNECTION CREATED")
         json_message = json.loads(responce.text)[0]
-        MESSAGES.append(json_message)
+        SESSION_DATA.console.page.controls[0].controls[0].content.controls.append(await prittyfy_my_embed(json_message))
+        SESSION_DATA.console.page.update()
     else:
         print(f"FAILED TO RECIVE DATA: {responce.status_code}")
     
@@ -136,18 +139,20 @@ async def scrappy_coco():
         if responce.status_code == 200:
             json_message = json.loads(responce.text)[0]
             if await validate_message(json_message):
-                MESSAGES.append(json_message)
+                SESSION_DATA.console.page.controls[0].controls[0].content.controls.append(await prittyfy_my_embed(json_message))
+                SESSION_DATA.console.page.update()
             await princonsole(f"[GET 200] MESSAGE RESPOND: {json_message['id']} added main to pull")
         else:
             print(f"FAILED TO RECIVE DATA: {responce.status_code}")
     await princonsole(f"TOTAL MESSAGES FOUND {MESSAGES.__len__()}")
-    await WrapNPost(MESSAGES)
+    #await WrapNPost(MESSAGES)
     
 
 
 
-async def StartSearching(page, console):
+async def StartSearching(page):
     # parse messages with whitelist and date filter
+    page.controls[0].controls[0].content = flet.ListView()
     await scrappy_coco()
     # drop black filtered messages
     # embeds to my embed
@@ -202,8 +207,9 @@ async def OptionPage():
 
     
     async def search_with_filters(e):
+        # TODO if something liek chat id not null
         await princonsole("Поиск запущен")
-        await StartSearching(e.page, CONSOLE)
+        await StartSearching(e.page)
 
     
     WHITE_LIST_FIELD = flet.TextField( label="WHITE LIST", border_color=COLLORS['discord-blue'] )
